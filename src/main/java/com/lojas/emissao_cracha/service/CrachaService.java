@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface CrachaService {
 
-    Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest) throws IOException;
+    Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest);
 
-    Optional<Cracha> buscarCrachaPorId(Long id);
+    Cracha buscarCrachaPorId(Long id);
 
-    Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest) throws IOException;
+    Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest);
 }

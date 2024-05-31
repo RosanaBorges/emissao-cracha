@@ -2,16 +2,18 @@ package com.lojas.emissao_cracha.service.impl;
 
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
+import com.lojas.emissao_cracha.exception.CrachaNaoEncontradoException;
+import com.lojas.emissao_cracha.exception.ErroInternoException;
+import com.lojas.emissao_cracha.exception.InserirFotoException;
+import com.lojas.emissao_cracha.exception.SalvarFotoException;
 import com.lojas.emissao_cracha.repository.CrachaRepository;
 import com.lojas.emissao_cracha.service.CrachaService;
 import com.lojas.emissao_cracha.util.FotoUploadUtil;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Service
 public class CrachaServiceImpl implements CrachaService {
@@ -24,40 +26,55 @@ public class CrachaServiceImpl implements CrachaService {
 
 
     @Override
-    public Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest) throws IOException {
+    public Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest) {
         validadorDeFotos(crachaDtoRequest.getFoto());
-        String fotoNome = fotoUploadUtil.salvarFoto(crachaDtoRequest.getFoto());
-        Cracha cracha = new Cracha();
-        cracha.setNome(crachaDtoRequest.getNome());
-        cracha.setCargo(crachaDtoRequest.getCargo());
-        cracha.setFoto(fotoNome);
-        return crachaRepository.save(cracha);
+        try {
+            String fotoNome = fotoUploadUtil.salvarFoto(crachaDtoRequest.getFoto());
+            Cracha cracha = new Cracha();
+            cracha.setNome(crachaDtoRequest.getNome());
+            cracha.setCargo(crachaDtoRequest.getCargo());
+            cracha.setFoto(fotoNome);
+            return crachaRepository.save(cracha);
+        } catch (IOException e) {
+            throw new SalvarFotoException("foto","Erro ao salvar a foto");
+        } catch (Exception e) {
+            throw new ErroInternoException("Erro interno por favor entre em contato com administrador", e);
+        }
     }
 
 
     @Override
-    public Optional<Cracha> buscarCrachaPorId(Long id) {
-        return crachaRepository.findById(id);
+    public Cracha buscarCrachaPorId(Long id) {
+        return crachaRepository.findById(id)
+                .orElseThrow(() -> new CrachaNaoEncontradoException("Cracha não encontrado pela matricula: " +id));
     }
 
 
     @Override
-    public Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest) throws IOException {
+    public Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest) {
         Cracha cracha = crachaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cracha não encontrado"));
+                .orElseThrow(() -> new CrachaNaoEncontradoException("Cracha não encontrado pela matricula: " +id));
         cracha.setNome(crachaDtoRequest.getNome());
         cracha.setCargo(crachaDtoRequest.getCargo());
         if (crachaDtoRequest.getFoto() != null && !crachaDtoRequest.getFoto().isEmpty()) {
             validadorDeFotos(crachaDtoRequest.getFoto());
-            String fotoNome = fotoUploadUtil.salvarFoto(crachaDtoRequest.getFoto());
-            cracha.setFoto(fotoNome);
+            try {
+                String fotoNome = fotoUploadUtil.salvarFoto(crachaDtoRequest.getFoto());
+                cracha.setFoto(fotoNome);
+            } catch (IOException e) {
+                throw new SalvarFotoException("foto", "Erro ao salvar a foto");
+            }
         }
-        return crachaRepository.save(cracha);
+        try {
+            return crachaRepository.save(cracha);
+        } catch (Exception e) {
+            throw new ErroInternoException("Erro interno por favor entre em contato com administrador", e);
+        }
     }
 
     private void validadorDeFotos(MultipartFile foto) {
         if (foto == null || foto.isEmpty()) {
-            throw new IllegalArgumentException("Por favor insira a foto.");
+            throw new InserirFotoException("foto", "Por favor insira a foto.");
         }
 
     }
