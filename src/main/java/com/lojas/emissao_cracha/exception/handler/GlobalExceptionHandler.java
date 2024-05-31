@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -21,12 +23,15 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handlerTratamentoExcecaoValidacao(MethodArgumentNotValidException exception) {
-        Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getAllErrors().forEach((error) -> {
-            String atributo = ((FieldError) error).getField();
-            String mensagem = error.getDefaultMessage();
-            errors.put(atributo, mensagem);
+    public List<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<Map<String, String>> errors = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            Map<String, String> errorMap = new HashMap<>();
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errorMap.put("field", fieldName);
+            errorMap.put("message", errorMessage);
+            errors.add(errorMap);
         });
         return errors;
     }
