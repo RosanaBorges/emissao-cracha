@@ -4,14 +4,13 @@ package com.lojas.emissao_cracha.exception.handler;
 import com.lojas.emissao_cracha.exception.CrachaNaoEncontradoException;
 import com.lojas.emissao_cracha.exception.ErroInternoException;
 import com.lojas.emissao_cracha.exception.InserirFotoException;
+import com.lojas.emissao_cracha.exception.SalvarFotoException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +54,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(ErroInternoException.class)
     public Map<String, String> handleErroInternoException(ErroInternoException exception) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("message", exception.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(SalvarFotoException.class)
+    public Map<String, String> handleSalvarFotoException(SalvarFotoException exception) {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message", exception.getMessage());
         return errorMap;
