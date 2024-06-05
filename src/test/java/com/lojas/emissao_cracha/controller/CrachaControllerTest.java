@@ -8,21 +8,22 @@ import com.lojas.emissao_cracha.exception.SalvarFotoException;
 import com.lojas.emissao_cracha.service.CrachaService;
 import com.lojas.emissao_cracha.util.FotoUploadUtil;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,9 +35,6 @@ public class CrachaControllerTest {
 
     @MockBean
     private CrachaService crachaService;
-
-    @InjectMocks
-    private CrachaController crachaController;
 
     @MockBean
     private FotoUploadUtil fotoUploadUtil;
@@ -87,20 +85,24 @@ public class CrachaControllerTest {
 
     @Test
     public void testEmitirCracha_ComCamposNomeECargoInvalidos() throws Exception {
-        // Cria uma foto válida
         MockMultipartFile foto = new MockMultipartFile("foto", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, "foto content".getBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/crachas/emitir")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/crachas/emitir")
                         .file(foto)
                         .param("nome", "")  // Nome vazio
                         .param("cargo", "") // Cargo vazio
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[1].field").value("cargo"))
-                .andExpect(jsonPath("$[1].message").value("Por favor insira o seu cargo."))
-                .andExpect(jsonPath("$[0].field").value("nome"))
-                .andExpect(jsonPath("$[0].message").value("Por favor escreva o nome que deseja ser chamado."));
+                .andDo(print())
+                .andReturn();
+
+        String responseContent = result.getResponse().getContentAsString();
+
+        assertTrue(responseContent.contains("\"field\":\"nome\",\"message\":\"Por favor escreva o nome que deseja ser chamado.\""));
+        assertTrue(responseContent.contains("\"field\":\"cargo\",\"message\":\"Por favor insira o seu cargo.\""));
     }
+
+
 
     @Test
     public void testEmitirCracha_ComFotoInvalida() throws Exception {
@@ -147,10 +149,8 @@ public class CrachaControllerTest {
 
     @Test
     public void testEmitirCracha_SalvarFotoException() throws Exception {
-        // Cria um CrachaDtoRequest com uma foto válida
         CrachaDtoRequest crachaDtoRequest = new CrachaDtoRequest("Nome Teste", "Cargo Teste", new MockMultipartFile("foto", "foto.jpg", "image/jpeg", new byte[0]));
 
-        // Simula a exceção SalvarFotoException ao chamar o método emitirCracha
         when(crachaService.emitirCracha(any(CrachaDtoRequest.class))).thenThrow(new SalvarFotoException("Erro ao salvar a foto"));
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/crachas/emitir")
