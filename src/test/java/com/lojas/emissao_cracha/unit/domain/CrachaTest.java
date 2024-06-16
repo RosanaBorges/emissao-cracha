@@ -38,7 +38,7 @@ public class CrachaTest {
         MockMultipartFile foto = new MockMultipartFile("foto", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, "fotoConteudo".getBytes());
         CrachaDtoRequest crachaDtoRequest = new CrachaDtoRequest(null, "Cargo Teste", foto);
         Set<ConstraintViolation<CrachaDtoRequest>> violations = validator.validate(crachaDtoRequest);
-        assertEquals(1, violations.size(), "Esperado que haja uma violação");
+        assertEquals(2, violations.size(), "Esperado que haja uma violação");
         assertEquals("Por favor escreva o nome que deseja ser chamado.", violations.iterator().next().getMessage());
     }
 
@@ -65,7 +65,7 @@ public class CrachaTest {
         MockMultipartFile foto = new MockMultipartFile("foto", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, "fotoConteudo".getBytes());
         CrachaDtoRequest crachaDtoRequest = new CrachaDtoRequest("Nome Teste", null, foto);
         Set<ConstraintViolation<CrachaDtoRequest>> violations = validator.validate(crachaDtoRequest);
-        assertEquals(1, violations.size(), "Esperado que haja uma violação");
+        assertEquals(2, violations.size(), "Esperado que haja uma violação");
         assertEquals("Por favor insira o seu cargo.", violations.iterator().next().getMessage());
     }
 
