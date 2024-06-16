@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Crachá</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>Criar Crachá</h1>
+        <form th:action="@{/api/v1/crachas/emitir}" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+            <div>
+                <label for="cargo">Cargo:</label>
+                <input type="text" id="cargo" name="cargo" required>
+            </div>
+            <div>
+                <label for="foto">Foto:</label>
+                <input type="file" id="foto" name="foto" required>
+            </div>
+            <div>
+                <button type="submit" class="button">Criar Crachá</button>
+            </div>
+        </form>
+        <div th:if="${message}">
+            <p th:text="${message}" style="color: green;"></p>
+            <div>
+                <a th:href="@{/api/v1/crachas/template/{id}(id=${cracha.id})}" class="button">Visualizar Crachá</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/scripts.js}"></script>
+</body>
+</html>
