@@ -6,25 +6,31 @@ import com.lojas.emissao_cracha.service.CrachaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@RestController
+@Controller
 @RequestMapping("/api/v1/crachas")
 public class CrachaController {
 
     @Autowired
     private CrachaService crachaService;
 
-    @PostMapping("emitir")
-    public ResponseEntity<Cracha> emitirCracha(@Valid @ModelAttribute CrachaDtoRequest crachaDtoRequest) {
+    @PostMapping("/emitir")
+    public String emitirCracha(@ModelAttribute CrachaDtoRequest crachaDtoRequest, Model model) {
         Cracha novoCracha = crachaService.emitirCracha(crachaDtoRequest);
-        return ResponseEntity.ok(novoCracha);
+        model.addAttribute("cracha", novoCracha);
+        model.addAttribute("message", "Crachá criado com sucesso");
+        return "criarCracha";
     }
 
-    @GetMapping("buscar/{id}")
-    public ResponseEntity<Cracha> buscarCrachaPorId(@PathVariable Long id) {
+    @GetMapping("/buscar/{id}")
+    public String buscarCrachaPorId(@PathVariable Long id, Model model) {
         Cracha cracha = crachaService.buscarCrachaPorId(id);
-        return ResponseEntity.ok(cracha);
+        model.addAttribute("cracha", cracha);
+        return "buscarCracha";
     }
 
     @PutMapping("atualizar/{id}")
@@ -33,6 +39,13 @@ public class CrachaController {
             @Valid @ModelAttribute CrachaDtoRequest crachaDtoRequest) {
         Cracha crachaAtualizado = crachaService.atualizarCracha(id, crachaDtoRequest);
         return ResponseEntity.ok(crachaAtualizado);
+    }
+
+    @GetMapping("/template/{id}")
+    public String exibirTemplateCracha(@PathVariable Long id, Model model) {
+        Cracha cracha = crachaService.buscarCrachaPorId(id);
+        model.addAttribute("cracha", cracha);
+        return "crachaTemplate";
     }
 
 }
