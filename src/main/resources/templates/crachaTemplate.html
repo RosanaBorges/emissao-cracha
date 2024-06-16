@@ -30,6 +30,12 @@
             font-size: 18px;
             margin-top: 10px;
         }
+        .cracha .qrcode {
+            width: 100px;
+            height: 100px;
+            object-fit: contain; /* Ajusta a imagem ao tamanho especificado */
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -37,6 +43,7 @@
     <img th:src="@{'/uploads/' + ${cracha.foto}}" alt="Foto do Funcionário">
     <div class="nome" th:text="${cracha.nome}">Nome do Funcionário</div>
     <div class="cargo" th:text="${cracha.cargo}">Cargo do Funcionário</div>
+    <img class="qrcode" th:src="@{'/uploads/' + ${cracha.qrCode}}" alt="QR Code do Funcionário">
 </div>
 </body>
 </html>

@@ -1,11 +1,14 @@
 package com.lojas.emissao_cracha.service.impl;
 
+import com.google.zxing.WriterException;
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
+import com.lojas.emissao_cracha.dto.CrachaDtoResponse;
 import com.lojas.emissao_cracha.exception.*;
 import com.lojas.emissao_cracha.repository.CrachaRepository;
 import com.lojas.emissao_cracha.service.CrachaService;
 import com.lojas.emissao_cracha.util.FotoUploadUtil;
+import com.lojas.emissao_cracha.util.QRCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,9 +24,11 @@ public class CrachaServiceImpl implements CrachaService {
     @Autowired
     private FotoUploadUtil fotoUploadUtil;
 
+    @Autowired
+    private QRCodeUtil qrCodeUtil;
 
     @Override
-    public Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest) {
+    public CrachaDtoResponse emitirCracha(CrachaDtoRequest crachaDtoRequest) {
         validadorDeFotos(crachaDtoRequest.getFoto());
         try {
             String fotoNome = fotoUploadUtil.salvarFoto(crachaDtoRequest.getFoto());
@@ -31,26 +36,57 @@ public class CrachaServiceImpl implements CrachaService {
             cracha.setNome(crachaDtoRequest.getNome());
             cracha.setCargo(crachaDtoRequest.getCargo());
             cracha.setFoto(fotoNome);
-            return crachaRepository.save(cracha);
+            cracha = crachaRepository.save(cracha);
+
+            // Gerar QRCode com base no ID do crachá
+            String qrCodeNome = cracha.getId() + "_qrcode.png";
+            qrCodeUtil.geradorQRCode("ID: " + cracha.getId(), qrCodeNome);
+            cracha.setQrCode(qrCodeNome);
+            cracha = crachaRepository.save(cracha);
+
+            // Converter para CrachaDtoResponse
+            CrachaDtoResponse response = new CrachaDtoResponse();
+            response.setId(cracha.getId());
+            response.setNome(cracha.getNome());
+            response.setCargo(cracha.getCargo());
+            response.setFoto(cracha.getFoto());
+            response.setQrCode(cracha.getQrCode());
+
+            return response;
         } catch (IOException e) {
             throw new SalvarFotoException("Erro ao salvar a foto");
+        } catch (WriterException e) {
+            throw new ErroInternoException("Erro ao gerar o QRCode");
         } catch (Exception e) {
             throw new ErroInternoException("Erro interno por favor entre em contato com administrador", e);
         }
     }
 
-
-    @Override
-    public Cracha buscarCrachaPorId(Long id) {
-        return crachaRepository.findById(id)
-                .orElseThrow(() -> new CrachaNaoEncontradoException("Cracha não encontrado pela matricula: " + id));
+    private void validadorDeFotos(MultipartFile foto) {
+        if (foto == null || foto.isEmpty()) {
+            throw new InserirFotoException("Por favor insira a foto.", "foto");
+        }
     }
 
+    @Override
+    public CrachaDtoResponse buscarCrachaPorId(Long id) {
+        Cracha cracha = crachaRepository.findById(id)
+                .orElseThrow(() -> new CrachaNaoEncontradoException("Crachá não encontrado pelo ID: " + id));
+
+        CrachaDtoResponse response = new CrachaDtoResponse();
+        response.setId(cracha.getId());
+        response.setNome(cracha.getNome());
+        response.setCargo(cracha.getCargo());
+        response.setFoto(cracha.getFoto());
+        response.setQrCode(cracha.getQrCode());
+
+        return response;
+    }
 
     @Override
-    public Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest) {
+    public CrachaDtoResponse atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest) {
         Cracha cracha = crachaRepository.findById(id)
-                .orElseThrow(() -> new CrachaNaoEncontradoException("Cracha não encontrado pela matricula: " + id));
+                .orElseThrow(() -> new CrachaNaoEncontradoException("Crachá não encontrado pelo ID: " + id));
         cracha.setNome(crachaDtoRequest.getNome());
         cracha.setCargo(crachaDtoRequest.getCargo());
         if (crachaDtoRequest.getFoto() != null && !crachaDtoRequest.getFoto().isEmpty()) {
@@ -62,17 +98,15 @@ public class CrachaServiceImpl implements CrachaService {
                 throw new SalvarFotoException("Erro ao salvar a foto");
             }
         }
-        try {
-            return crachaRepository.save(cracha);
-        } catch (Exception e) {
-            throw new ErroInternoException("Erro interno por favor entre em contato com administrador", e);
-        }
-    }
+        cracha = crachaRepository.save(cracha);
 
-    private void validadorDeFotos(MultipartFile foto) {
-        if (foto == null || foto.isEmpty()) {
-            throw new InserirFotoException("Por favor insira a foto.", "foto");
-        }
+        CrachaDtoResponse response = new CrachaDtoResponse();
+        response.setId(cracha.getId());
+        response.setNome(cracha.getNome());
+        response.setCargo(cracha.getCargo());
+        response.setFoto(cracha.getFoto());
+        response.setQrCode(cracha.getQrCode());
 
+        return response;
     }
 }

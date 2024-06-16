@@ -2,12 +2,13 @@ package com.lojas.emissao_cracha.service;
 
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
+import com.lojas.emissao_cracha.dto.CrachaDtoResponse;
 
 public interface CrachaService {
 
-    Cracha emitirCracha(CrachaDtoRequest crachaDtoRequest);
+    CrachaDtoResponse emitirCracha(CrachaDtoRequest crachaDtoRequest);
 
-    Cracha buscarCrachaPorId(Long id);
+    CrachaDtoResponse buscarCrachaPorId(Long id);
 
-    Cracha atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest);
+    CrachaDtoResponse atualizarCracha(Long id, CrachaDtoRequest crachaDtoRequest);
 }

@@ -27,4 +27,6 @@ public class Cracha {
     private String cargo;
 
     private String foto;
+
+    private String qrCode;
 }
