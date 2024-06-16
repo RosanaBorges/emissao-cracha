@@ -1,6 +1,7 @@
-package com.lojas.emissao_cracha.controller;
+package com.lojas.emissao_cracha.unit.controller;
 
 
+import com.lojas.emissao_cracha.controller.CrachaController;
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
 import com.lojas.emissao_cracha.exception.CrachaNaoEncontradoException;

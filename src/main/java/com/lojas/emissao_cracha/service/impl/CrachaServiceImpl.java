@@ -2,10 +2,7 @@ package com.lojas.emissao_cracha.service.impl;
 
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
-import com.lojas.emissao_cracha.exception.CrachaNaoEncontradoException;
-import com.lojas.emissao_cracha.exception.ErroInternoException;
-import com.lojas.emissao_cracha.exception.InserirFotoException;
-import com.lojas.emissao_cracha.exception.SalvarFotoException;
+import com.lojas.emissao_cracha.exception.*;
 import com.lojas.emissao_cracha.repository.CrachaRepository;
 import com.lojas.emissao_cracha.service.CrachaService;
 import com.lojas.emissao_cracha.util.FotoUploadUtil;
@@ -74,7 +71,7 @@ public class CrachaServiceImpl implements CrachaService {
 
     private void validadorDeFotos(MultipartFile foto) {
         if (foto == null || foto.isEmpty()) {
-            throw new InserirFotoException("foto", "Por favor insira a foto.");
+            throw new InserirFotoException("Por favor insira a foto.", "foto");
         }
 
     }

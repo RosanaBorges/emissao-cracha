@@ -22,12 +22,9 @@ public class Cracha {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Por favor escreva o nome que deseja ser chamado.")
     private String Nome;
 
-    @NotNull(message = "Por favor insira o seu cargo. ")
     private String cargo;
 
-    @NotNull(message = "Por favor insira a foto.")
     private String foto;
 }

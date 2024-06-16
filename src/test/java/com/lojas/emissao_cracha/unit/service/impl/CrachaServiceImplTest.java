@@ -1,9 +1,10 @@
-package com.lojas.emissao_cracha.service.impl;
+package com.lojas.emissao_cracha.unit.service.impl;
 
 import com.lojas.emissao_cracha.domain.Cracha;
 import com.lojas.emissao_cracha.dto.CrachaDtoRequest;
 import com.lojas.emissao_cracha.exception.InserirFotoException;
 import com.lojas.emissao_cracha.repository.CrachaRepository;
+import com.lojas.emissao_cracha.service.impl.CrachaServiceImpl;
 import com.lojas.emissao_cracha.util.FotoUploadUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ClienteServiceImplTest {
+public class CrachaServiceImplTest {
 
     @Mock
     private CrachaRepository crachaRepository;
@@ -111,7 +112,7 @@ public class ClienteServiceImplTest {
         crachaDtoRequest.setCargo("Engenheiro");
         crachaDtoRequest.setFoto(null);
 
-        Exception exception = assertThrows(InserirFotoException.class, () -> {
+        InserirFotoException exception = assertThrows(InserirFotoException.class, () -> {
             crachaServiceImpl.emitirCracha(crachaDtoRequest);
         });
 
@@ -130,7 +131,7 @@ public class ClienteServiceImplTest {
         when(mockFile.isEmpty()).thenReturn(true);
         crachaDtoRequest.setFoto(mockFile);
 
-        Exception exception = assertThrows(InserirFotoException.class, () -> {
+        InserirFotoException exception = assertThrows(InserirFotoException.class, () -> {
             crachaServiceImpl.emitirCracha(crachaDtoRequest);
         });
 
@@ -139,5 +140,4 @@ public class ClienteServiceImplTest {
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
-
 }
